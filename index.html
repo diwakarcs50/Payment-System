@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>payment gateway</h1>
+
+    <button id="rzp-button1">Pay with Razorpay</button>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      let rzbutton = document.getElementById('rzp-button1');
+
+      rzbutton.addEventListener('click', async (event) => {
+        try {
+          const response = await fetch('http://localhost:4000/order', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ amount: 50 }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const myresponse = await response.json();
+          const { order } = myresponse;
+
+          // Create Razorpay options and initialize Razorpay here
+          var options = {
+            key: 'rzp_test_ImtKCqXKk92nhZ',
+            amount: 5000,
+            currency: 'INR',
+            order_id: order.id,
+            handler: function (response) {
+              alert(response.razorpay_payment_id);
+              alert(response.razorpay_order_id);
+              alert(response.razorpay_signature);
+            },
+          };
+
+          var rzp1 = new Razorpay(options);
+
+          // Open Razorpay payment dialog
+          rzp1.open();
+        } catch (error) {
+          console.error('An error occurred:', error);
+          // Handle the error gracefully, e.g., display an error message to the user
+        }
+      });
+    </script>
+  </body>
+</html>
